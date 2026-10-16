@@ -1,7 +1,8 @@
 # Dependencies (C# version)
 
-All projects target .NET 10 (`net10.0`). NuGet versions are pinned in the `.csproj` files. The
-Python packages come from the Python environment that `IDS4ALL_PYTHON_DLL` points to.
+All projects target .NET 10 (`net10.0`). Development uses the .NET SDK 10.0.402. NuGet versions
+are pinned in the `.csproj` files. The Python packages come from the Python environment that
+`IDS4ALL_PYTHON_DLL` points to.
 
 ## NuGet packages
 
@@ -15,7 +16,25 @@ Python packages come from the Python environment that `IDS4ALL_PYTHON_DLL` point
 
 `IDS4ALL.Core` has no NuGet packages. It reads `.xlsx` files with its own reader in
 [src/IDS4ALL.Core/Excel/](src/IDS4ALL.Core/Excel/), which uses `System.IO.Compression` and
-`System.Xml` from the .NET base library.
+`System.Xml` from the .NET base library. `IDS4ALL.Cli` gets `pythonnet` through its reference to
+`IDS4ALL.IfcTester`.
+
+### Transitive NuGet packages
+
+These packages come only with the test packages. `pythonnet` has no dependencies of its own.
+
+| Package | Version | Pulled in by |
+| ------- | ------- | ------------ |
+| `Microsoft.CodeCoverage` | 17.14.1 | `Microsoft.NET.Test.Sdk` |
+| `Microsoft.TestPlatform.ObjectModel` | 17.14.1 | `Microsoft.TestPlatform.TestHost` |
+| `Microsoft.TestPlatform.TestHost` | 17.14.1 | `Microsoft.NET.Test.Sdk` |
+| `Newtonsoft.Json` | 13.0.3 | `Microsoft.TestPlatform.TestHost` |
+| `xunit.abstractions` | 2.0.3 | `xunit.extensibility.core` |
+| `xunit.analyzers` | 1.18.0 | `xunit` |
+| `xunit.assert` | 2.9.3 | `xunit` |
+| `xunit.core` | 2.9.3 | `xunit` |
+| `xunit.extensibility.core` | 2.9.3 | `xunit.core` |
+| `xunit.extensibility.execution` | 2.9.3 | `xunit.core` |
 
 ## Python packages
 
@@ -33,13 +52,35 @@ C# results with the Python version. These tests need the full Python package set
 
 ## Python versions
 
-| Environment | Python | `ifcopenshell` | `ifctester` | `pandas` |
-| ----------- | ------ | -------------- | ----------- | -------- |
-| [../requirements.txt](../requirements.txt) (Python version) | 3.10 to 3.12 | 0.8.1.post1 | 0.8.1 | 2.2.3 |
-| Development of the C# port | 3.14.7 | 0.9.0.post1 | 0.8.1 | 2.3.3 |
+The C# port uses a Python 3.14 environment. `ifcopenshell` 0.8.1.post1 has no wheel for Python
+3.13 or later, so this environment cannot use the pinned versions.
 
-`ifcopenshell` 0.8.1.post1 has no wheel for Python 3.13 or later. Before the first C# release,
-run the golden and differential tests again with Python 3.12 and the pinned versions.
+| Package | [../requirements.txt](../requirements.txt) | C# development |
+| ------- | ------------------------------------------ | -------------- |
+| Python | 3.10 to 3.12 | 3.14.7 |
+| `ifcopenshell` | 0.8.1.post1 | **0.9.0.post1** |
+| `ifctester` | 0.8.1 | 0.8.1 |
+| `xmlschema` | 3.4.3 | 3.4.3 |
+| `elementpath` | 4.8.0 | 4.8.0 |
+| `pandas` | 2.2.3 | **2.3.3** |
+| `openpyxl` | 3.1.5 | 3.1.5 |
+| `et_xmlfile` | 2.0.0 | 2.0.0 |
+| `deepdiff` | 8.3.0 | 8.3.0 |
+| `deepmerge` | 2.0 | 2.0 |
+| `orderly-set` | 5.3.0 | **5.5.0** |
+| `numpy` | 2.2.3 | **2.5.4** |
+| `shapely` | 2.0.7 | **2.2.0** |
+| `lark` | 1.2.2 | **1.3.1** |
+| `isodate` | 0.7.2 | 0.7.2 |
+| `pyparsing` | not used | **3.3.3**, new dependency of `ifcopenshell` 0.9 |
+| `python-dateutil` | 2.9.0.post0 | 2.9.0.post0 |
+| `six` | 1.17.0 | 1.17.0 |
+| `pytz` | 2025.1 | **2026.5** |
+| `tzdata` | 2025.1 | **2026.5** |
+| `typing_extensions` | 4.12.2 | **4.16.0** |
+
+Bold versions differ from `requirements.txt`. Before the first C# release, run the golden and
+differential tests again with Python 3.12 and the pinned versions.
 
 ## Environment variables
 
