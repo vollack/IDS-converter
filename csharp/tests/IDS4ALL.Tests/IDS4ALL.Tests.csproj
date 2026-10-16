@@ -19,6 +19,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="Golden\**" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\src\IDS4ALL.Core\IDS4ALL.Core.csproj" />
     <ProjectReference Include="..\..\src\IDS4ALL.IfcTester\IDS4ALL.IfcTester.csproj" />
   </ItemGroup>
