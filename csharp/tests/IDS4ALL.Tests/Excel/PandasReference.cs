@@ -102,8 +102,7 @@ internal static class PandasReference
                 return _error(e)
         """;
 
-    private static readonly object Gate = new();
-    private static PyModule? _scope;
+    private static readonly PythonScript Script = new(Code);
 
     public static bool IsConfigured =>
         !string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable(PythonRuntimeOptions.PythonDllVariable))
@@ -178,51 +177,5 @@ internal static class PandasReference
         return new(root.GetProperty("rows").EnumerateArray().Select(r => (Cell(r[0]), Cell(r[1]))).ToList(), null);
     }
 
-    private static JsonDocument Call(string function, params object[] arguments)
-    {
-        lock (Gate)
-        {
-            PythonRuntime.EnsureInitialized(PythonRuntimeOptions.FromEnvironment());
-            using (Py.GIL())
-            {
-                if (_scope is null)
-                {
-                    _scope = Py.CreateScope();
-                    _scope.Exec(Code);
-                }
-
-                var converted = arguments.Select(ToPython).ToArray();
-                try
-                {
-                    using var callable = _scope.Get(function);
-                    using var result = callable.Invoke(converted);
-                    return JsonDocument.Parse(result.As<string>());
-                }
-                finally
-                {
-                    foreach (var item in converted) item.Dispose();
-                }
-            }
-        }
-    }
-
-    private static PyObject ToPython(object value) => value switch
-    {
-        string text => new PyString(text),
-        int number => new PyInt(number),
-        bool flag => new PyInt(flag ? 1 : 0),
-        IEnumerable<string> list => ToList(list),
-        _ => throw new ArgumentOutOfRangeException(nameof(value)),
-    };
-
-    private static PyList ToList(IEnumerable<string> items)
-    {
-        var list = new PyList();
-        foreach (var item in items)
-        {
-            using var text = new PyString(item);
-            list.Append(text);
-        }
-        return list;
-    }
+    private static JsonDocument Call(string function, params object[] arguments) => Script.Call(function, arguments);
 }
