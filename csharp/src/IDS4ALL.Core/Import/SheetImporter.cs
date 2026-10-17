@@ -14,7 +14,7 @@ public sealed record ImportedSheet(SheetColumns Columns, StringFrame Frame);
 /// <summary>Port of the import part of excel_to_spec_list, up to the creation of df_filled.</summary>
 public static class SheetImporter
 {
-    public static ImportedSheet Import(IXlsxWorkbook workbook, Ids4AllSettings settings)
+    public static ImportedSheet Import(XlsxWorkbook workbook, Ids4AllSettings settings)
     {
         var allColumns = PandasExcel.ReadColumns(workbook, settings.SheetName, settings.SkippedRows);
         var columns = SheetColumns.From(allColumns, settings.IsEntityBasedApplicability, settings.SheetName);

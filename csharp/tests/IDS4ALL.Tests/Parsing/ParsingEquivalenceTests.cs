@@ -27,7 +27,7 @@ public sealed class ParsingEquivalenceTests
     {
         var path = RepositoryRoot.ExcelFile(workbook);
         Ids4AllSettings settings;
-        using (var opened = TestWorkbook.Open(path)) settings = MetadataReader.Read(opened);
+        using (var opened = XlsxWorkbook.Open(path)) settings = MetadataReader.Read(opened);
 
         AssertSheetSameAsPython(path, settings);
     }
@@ -108,7 +108,7 @@ public sealed class ParsingEquivalenceTests
         string? error = null;
         try
         {
-            using var workbook = TestWorkbook.Open(path);
+            using var workbook = XlsxWorkbook.Open(path);
             var imported = SheetImporter.Import(workbook, settings);
             columns = imported.Columns;
             grouped = SheetGrouper.Group(imported, settings.SeparateBy);

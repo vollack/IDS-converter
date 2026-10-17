@@ -8,7 +8,7 @@ public static class MetadataReader
 {
     public const string MetadataSheet = "IDS4ALL";
 
-    public static Ids4AllSettings Read(IXlsxWorkbook workbook)
+    public static Ids4AllSettings Read(XlsxWorkbook workbook)
     {
         var entries = new Dictionary<string, object>(StringComparer.Ordinal);
         foreach (var (key, value) in PandasExcel.ReadFirstTwoColumns(workbook, MetadataSheet, 1))
