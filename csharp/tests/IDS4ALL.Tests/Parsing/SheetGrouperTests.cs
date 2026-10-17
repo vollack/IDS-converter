@@ -18,7 +18,7 @@ public sealed class SheetGrouperTests
         new XlsxBuilder().Sheet("Data", rows).Save(path);
         var settings = new Ids4AllSettings("Data", "IFC4", separateBy, 0, false, "Title", null, null, null, null);
 
-        using var workbook = XlsxWorkbook.Open(path);
+        using var workbook = TestWorkbook.Open(path);
         return SheetGrouper.Group(SheetImporter.Import(workbook, settings), separateBy);
     }
 

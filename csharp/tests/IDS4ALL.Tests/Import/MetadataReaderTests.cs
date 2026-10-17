@@ -10,7 +10,7 @@ public sealed class MetadataReaderTests
 
     private static Ids4AllSettings Read(string path)
     {
-        using var workbook = XlsxWorkbook.Open(path);
+        using var workbook = TestWorkbook.Open(path);
         return MetadataReader.Read(workbook);
     }
 

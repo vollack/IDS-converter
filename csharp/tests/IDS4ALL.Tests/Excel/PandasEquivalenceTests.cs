@@ -283,7 +283,7 @@ public sealed class PandasEquivalenceTests
         var expectedColumns = PandasReference.ReadColumns(path, sheet, skipRows);
         var (actualColumns, columnError) = Run(() =>
         {
-            using var workbook = XlsxWorkbook.Open(path);
+            using var workbook = TestWorkbook.Open(path);
             return PandasExcel.ReadColumns(workbook, sheet, skipRows);
         });
 
@@ -307,7 +307,7 @@ public sealed class PandasEquivalenceTests
         var expected = PandasReference.ReadStrings(path, sheet, skipRows, useColumns);
         var (actual, error) = Run(() =>
         {
-            using var workbook = XlsxWorkbook.Open(path);
+            using var workbook = TestWorkbook.Open(path);
             return PandasExcel.ReadStrings(workbook, sheet, skipRows, useColumns);
         });
 

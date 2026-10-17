@@ -13,7 +13,7 @@ namespace IDS4ALL.Core.Excel;
 /// string, BigInteger (integral number), double, bool, DateTime, DateOnly, TimeOnly, PythonTimedelta.
 /// An empty cell is "" and an error cell is double.NaN.
 /// </summary>
-public sealed partial class XlsxWorkbook : IDisposable
+public sealed partial class XlsxWorkbook : IXlsxWorkbook
 {
     private static readonly XNamespace Main = "http://schemas.openxmlformats.org/spreadsheetml/2006/main";
     private static readonly XNamespace Relationship = "http://schemas.openxmlformats.org/officeDocument/2006/relationships";

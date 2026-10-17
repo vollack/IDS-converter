@@ -14,7 +14,7 @@ public sealed class SheetImporterTests
 
     private static ImportedSheet Import(string path, Ids4AllSettings settings)
     {
-        using var workbook = XlsxWorkbook.Open(path);
+        using var workbook = TestWorkbook.Open(path);
         return SheetImporter.Import(workbook, settings);
     }
 
@@ -105,7 +105,7 @@ public sealed class SheetImporterTests
     {
         var path = RepositoryRoot.ExcelFile(workbook);
         Ids4AllSettings settings;
-        using (var opened = XlsxWorkbook.Open(path)) settings = MetadataReader.Read(opened);
+        using (var opened = TestWorkbook.Open(path)) settings = MetadataReader.Read(opened);
 
         AssertSameAsPython(path, settings);
     }

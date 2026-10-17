@@ -27,14 +27,14 @@ public static class PandasExcel
     /// The column names, as <c>pd.read_excel(..., skiprows=n, nrows=0).columns</c>.
     /// pandas reads only the first rows then, so the width comes from the rows up to the header row.
     /// </summary>
-    public static IReadOnlyList<string> ReadColumns(XlsxWorkbook workbook, string sheet, int skipRows) =>
+    public static IReadOnlyList<string> ReadColumns(IXlsxWorkbook workbook, string sheet, int skipRows) =>
         Header(workbook.ReadRows(sheet, skipRows + 1), skipRows);
 
     /// <summary>
     /// <c>pd.read_excel(path, sheet_name=sheet, skiprows=skipRows, usecols=useColumns, dtype=str)</c>.
     /// The columns keep their order in the sheet. A sheet without data gives an empty frame.
     /// </summary>
-    public static StringFrame ReadStrings(XlsxWorkbook workbook, string sheet, int skipRows, IReadOnlyCollection<string> useColumns)
+    public static StringFrame ReadStrings(IXlsxWorkbook workbook, string sheet, int skipRows, IReadOnlyCollection<string> useColumns)
     {
         var rows = workbook.ReadRows(sheet);
         if (rows.Count == 0 || skipRows >= rows.Count) return StringFrame.Empty;
@@ -57,7 +57,7 @@ public static class PandasExcel
     /// <c>pd.read_excel(path, sheet_name=sheet, usecols=[0, 1], header=None, skiprows=skipRows)</c>.
     /// Values keep their type: string, BigInteger, double, bool or a date or time type. Null is a missing value.
     /// </summary>
-    public static IReadOnlyList<(object? First, object? Second)> ReadFirstTwoColumns(XlsxWorkbook workbook, string sheet, int skipRows)
+    public static IReadOnlyList<(object? First, object? Second)> ReadFirstTwoColumns(IXlsxWorkbook workbook, string sheet, int skipRows)
     {
         var rows = workbook.ReadRows(sheet);
         var lines = rows.Skip(skipRows).ToList();
