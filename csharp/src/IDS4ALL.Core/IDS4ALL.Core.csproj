@@ -6,4 +6,10 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="ClosedXML" Version="0.105.1" />
+    <!-- ClosedXML accepts SixLabors.Fonts 1.x and 2.x. Version 2 has the Six Labors Split License. Keep 1.0.0 (Apache 2.0). -->
+    <PackageReference Include="SixLabors.Fonts" Version="[1.0.0]" />
+  </ItemGroup>
+
 </Project>

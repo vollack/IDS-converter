@@ -8,23 +8,36 @@ are pinned in the `.csproj` files. The Python packages come from the Python envi
 
 | Package | Version | Project | Use |
 | ------- | ------- | ------- | --- |
+| `ClosedXML` | 0.105.1 | `IDS4ALL.Core` | Reads the cells of the Excel files. |
+| `SixLabors.Fonts` | 1.0.0 | `IDS4ALL.Core` | Required by `ClosedXML`. Pinned to the Apache 2.0 version, see below. |
 | `pythonnet` | 3.2.1 | `IDS4ALL.IfcTester` | Starts the embedded Python and calls `ifctester` to build, write and validate the IDS. |
 | `xunit` | 2.9.3 | `IDS4ALL.Tests` | Test framework. |
 | `xunit.runner.visualstudio` | 3.1.4 | `IDS4ALL.Tests` | Runs the xunit tests in `dotnet test` and in Visual Studio. |
 | `Microsoft.NET.Test.Sdk` | 17.14.1 | `IDS4ALL.Tests` | Test host for `dotnet test`. |
 | `coverlet.collector` | 6.0.4 | `IDS4ALL.Tests` | Collects code coverage with `dotnet test --collect:"XPlat Code Coverage"`. |
 
-`IDS4ALL.Core` has no NuGet packages. It reads `.xlsx` files with its own reader in
-[src/IDS4ALL.Core/Excel/](src/IDS4ALL.Core/Excel/), which uses `System.IO.Compression` and
-`System.Xml` from the .NET base library. `IDS4ALL.Cli` gets `pythonnet` through its reference to
-`IDS4ALL.IfcTester`.
+`IDS4ALL.Core` reads `.xlsx` files with `ClosedXML` in
+[src/IDS4ALL.Core/Excel/XlsxWorkbook.cs](src/IDS4ALL.Core/Excel/XlsxWorkbook.cs). It converts the cell
+values to the types that pandas gets from openpyxl. The known differences are in
+[XlsxReaderDifferenceTests.cs](tests/IDS4ALL.Tests/Excel/XlsxReaderDifferenceTests.cs).
+`IDS4ALL.Cli` gets `pythonnet` through its reference to `IDS4ALL.IfcTester`.
+
+`ClosedXML` is MIT licensed. Its owners are igitur, jahav and pankraty. It allows `SixLabors.Fonts`
+1.x and 2.x. Version 2 has the Six Labors Split License, so `IDS4ALL.Core` pins version 1.0.0
+(Apache 2.0) with `[1.0.0]`. Do not raise it without a licence check.
 
 ### Transitive NuGet packages
 
-These packages come only with the test packages. `pythonnet` has no dependencies of its own.
+These packages come with `ClosedXML` and with the test packages. `pythonnet` has no dependencies of its own.
 
 | Package | Version | Pulled in by |
 | ------- | ------- | ------------ |
+| `ClosedXML.Parser` | 2.0.0 | `ClosedXML` |
+| `DocumentFormat.OpenXml` | 3.1.1 | `ClosedXML` |
+| `DocumentFormat.OpenXml.Framework` | 3.1.1 | `DocumentFormat.OpenXml` |
+| `ExcelNumberFormat` | 1.1.0 | `ClosedXML` |
+| `RBush.Signed` | 4.0.0 | `ClosedXML` |
+| `System.IO.Packaging` | 8.0.1 | `DocumentFormat.OpenXml.Framework` |
 | `Microsoft.CodeCoverage` | 17.14.1 | `Microsoft.NET.Test.Sdk` |
 | `Microsoft.TestPlatform.ObjectModel` | 17.14.1 | `Microsoft.TestPlatform.TestHost` |
 | `Microsoft.TestPlatform.TestHost` | 17.14.1 | `Microsoft.NET.Test.Sdk` |
