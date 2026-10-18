@@ -9,7 +9,8 @@ namespace IDS4ALL.Core.Import;
 /// </summary>
 /// <param name="Columns">The columns that belong to each facet. Specification includes SpecificationIfcVersion.</param>
 /// <param name="Frame">The relevant columns. Same order as in the sheet; a SpecificationIfcVersion column that was missing is last.</param>
-public sealed record ImportedSheet(SheetColumns Columns, StringFrame Frame);
+/// <param name="IfcVersionColumnUsed">True if the sheet has its own SpecificationIfcVersion column (spec_ifc_version_col_used).</param>
+public sealed record ImportedSheet(SheetColumns Columns, StringFrame Frame, bool IfcVersionColumnUsed);
 
 /// <summary>Port of the import part of excel_to_spec_list, up to the creation of df_filled.</summary>
 public static class SheetImporter
@@ -28,6 +29,7 @@ public static class SheetImporter
         FillMissing(names, rows, cardinality, "required");
 
         // Empty specification IFC version gets the default version of the sheet IDS4ALL.
+        var ifcVersionColumnUsed = names.Contains(SpecificationIfcVersion);
         var specification = columns.Specification.ToList();
         if (!names.Contains(SpecificationIfcVersion))
         {
@@ -42,7 +44,7 @@ public static class SheetImporter
 
         // A missing value gets a placeholder.
         var filled = rows.Select(row => row.Select(cell => cell ?? KeywordMissing).ToArray()).ToList();
-        return new ImportedSheet(columns with { Specification = specification }, new StringFrame(names, filled));
+        return new ImportedSheet(columns with { Specification = specification }, new StringFrame(names, filled), ifcVersionColumnUsed);
     }
 
     /// <summary>Python fillna on one column: only missing cells get the value.</summary>
