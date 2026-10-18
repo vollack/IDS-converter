@@ -27,6 +27,12 @@ public static class PythonText
     /// </summary>
     public static string Upper(string text) => text.ToUpperInvariant();
 
+    /// <summary>
+    /// Python str.lower() for text without special case mappings. Python maps "İ" to two characters, .NET to one.
+    /// The values that the converter compares (required, prohibited) are ASCII.
+    /// </summary>
+    public static string Lower(string text) => text.ToLowerInvariant();
+
     /// <summary>Python repr() of a str.</summary>
     public static string Repr(string text)
     {
