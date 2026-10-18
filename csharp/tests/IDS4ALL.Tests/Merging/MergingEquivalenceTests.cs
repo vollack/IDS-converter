@@ -99,16 +99,7 @@ public sealed class MergingEquivalenceTests
         var compared = 0;
         for (var run = 0; run < Runs; run++)
         {
-            var columns = Pools.Keys.OrderBy(_ => random.Next()).Take(random.Next(2, 14)).ToList();
-            if (!columns.Any(column => column.StartsWith("A.", StringComparison.Ordinal))) columns.Add("A.Entity");
-            var pools = columns.Select(column => Enumerable.Range(0, random.Next(1, 4)).Select(_ => RandomCell(random, column)).ToArray()).ToArray();
-
-            var rows = new List<TestCell?[]> { columns.Select(column => (TestCell?)T(column)).ToArray() };
-            for (var r = random.Next(1, 10); r > 0; r--)
-                rows.Add(columns.Select((_, c) => pools[c][random.Next(pools[c].Length)]).ToArray());
-
-            var separateBy = new[] { "Phase", "Role", "Usecase" }.Where(_ => random.Next(3) == 0).ToArray();
-            new XlsxBuilder().Sheet("Data", [.. rows]).Save(path);
+            var (columns, separateBy) = WriteRandomSheet(random, path);
             try
             {
                 if (AssertSameAsPython(path, Settings(separateBy, random.Next(5) == 0))) compared++;
@@ -123,8 +114,24 @@ public sealed class MergingEquivalenceTests
         Assert.True(compared >= Runs / 2, $"Only {compared} of {Runs} random sheets gave specifications in Python.");
     }
 
-    private static Ids4AllSettings Settings(string[] separateBy, bool entityBased) =>
+    internal static Ids4AllSettings Settings(string[] separateBy, bool entityBased) =>
         new("Data", "IFC4|IFC2X3", separateBy, 0, entityBased, "Title", null, null, null, null);
+
+    /// <summary>Writes a sheet with random columns and rows. Each column has a few cells that repeat, so that rows merge.</summary>
+    internal static (List<string> Columns, string[] SeparateBy) WriteRandomSheet(Random random, string path)
+    {
+        var columns = Pools.Keys.OrderBy(_ => random.Next()).Take(random.Next(2, 14)).ToList();
+        if (!columns.Any(column => column.StartsWith("A.", StringComparison.Ordinal))) columns.Add("A.Entity");
+        var pools = columns.Select(column => Enumerable.Range(0, random.Next(1, 4)).Select(_ => RandomCell(random, column)).ToArray()).ToArray();
+
+        var rows = new List<TestCell?[]> { columns.Select(column => (TestCell?)T(column)).ToArray() };
+        for (var r = random.Next(1, 10); r > 0; r--)
+            rows.Add(columns.Select((_, c) => pools[c][random.Next(pools[c].Length)]).ToArray());
+
+        var separateBy = new[] { "Phase", "Role", "Usecase" }.Where(_ => random.Next(3) == 0).ToArray();
+        new XlsxBuilder().Sheet("Data", [.. rows]).Save(path);
+        return (columns, separateBy);
+    }
 
     /// <returns>True if Python gave a list of specifications (and C# the same list).</returns>
     private static bool AssertSameAsPython(string path, Ids4AllSettings settings)
@@ -218,7 +225,7 @@ public sealed class MergingEquivalenceTests
 
     private static int Runs => int.TryParse(Environment.GetEnvironmentVariable("IDS4ALL_FUZZ_RUNS"), out var runs) ? runs : 150;
 
-    private static readonly Dictionary<string, string[]> Pools = new()
+    internal static readonly Dictionary<string, string[]> Pools = new()
     {
         ["A.Entity"] = ["IFCWALL", "IFCSLAB", "IFCWALL.STANDARD", "IFCDOOR|IFCWINDOW", "IFCWALL|IFCSLAB", "IFCWALL.STANDARD|IFCWALL.USERDEFINED", "IFCSLAB.FLOOR"],
         ["A.Property"] = ["IsExternal", "LoadBearing"],
@@ -258,7 +265,7 @@ public sealed class MergingEquivalenceTests
         ["SpecificationIfcVersion"] = ["IFC4", "IFC2X3", "IFC4|IFC2X3", "IFC4X3_ADD2", "IFC2X3|IFC4|IFC4X3_ADD2"],
     };
 
-    private static TestCell? RandomCell(Random random, string column)
+    internal static TestCell? RandomCell(Random random, string column)
     {
         if (random.Next(8) == 0) return null;
         var pool = Pools[column];

@@ -19,10 +19,11 @@ public sealed class PropertyDescriptions
         _descriptions[(null, name)] = description;
     }
 
+    /// <summary>The description of the property in the property set, or else the last description of a property with this name.</summary>
     public string? Find(string propertySet, string name) =>
-        _descriptions.TryGetValue((propertySet, name), out var exact) ? exact
-            : _descriptions.TryGetValue((null, name), out var byName) ? byName
-            : null;
+        _descriptions.TryGetValue((propertySet, name), out var exact) ? exact : FindByName(name);
+
+    public string? FindByName(string name) => _descriptions.GetValueOrDefault((null, name));
 }
 
 /// <param name="Specifications">The specifications in the order of the input.</param>
