@@ -78,9 +78,9 @@ The C# port uses a Python 3.14 environment. `ifcopenshell` 0.8.1.post1 has no wh
 | `pandas` | 2.2.3 | **2.3.3** |
 | `openpyxl` | 3.1.5 | 3.1.5 |
 | `et_xmlfile` | 2.0.0 | 2.0.0 |
-| `deepdiff` | 8.3.0 | 8.3.0 |
+| `deepdiff` | 8.6.2 | 8.6.2 |
 | `deepmerge` | 2.0 | 2.0 |
-| `orderly-set` | 5.3.0 | **5.5.0** |
+| `orderly-set` | 5.5.0 | 5.5.0 |
 | `numpy` | 2.2.3 | **2.5.4** |
 | `shapely` | 2.0.7 | **2.2.0** |
 | `lark` | 1.2.2 | **1.3.1** |
