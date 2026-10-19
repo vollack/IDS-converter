@@ -1,3 +1,4 @@
+using System.Text;
 using IDS4ALL.Core.Model;
 using Python.Runtime;
 
@@ -42,6 +43,25 @@ public sealed class IdsWriter
             {
                 throw new IdsWriteException(ex.Value?.ToString() ?? ex.Message, ex);
             }
+        }
+    }
+
+    /// <summary>
+    /// Writes the IDS file to text, UTF-8 with the XML declaration. ifctester can only write to a path, so this writes
+    /// a temporary file and reads it back. The file is deleted.
+    /// </summary>
+    /// <exception cref="IdsWriteException">ifctester raised an exception.</exception>
+    public IdsOutput WriteToString(IdsFile file, string? creatorComment = null)
+    {
+        var path = Path.Combine(Path.GetTempPath(), $"ids4all-{Guid.NewGuid():N}.ids");
+        try
+        {
+            var isValid = Write(file, path, creatorComment);
+            return new IdsOutput(File.ReadAllText(path, Encoding.UTF8), isValid);
+        }
+        finally
+        {
+            File.Delete(path);
         }
     }
 

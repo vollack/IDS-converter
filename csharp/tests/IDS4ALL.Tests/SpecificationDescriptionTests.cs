@@ -4,6 +4,8 @@ using IDS4ALL.IfcTester;
 
 namespace IDS4ALL.Tests;
 
+// One collection: BridgeTests counts the temporary .ids files in the temp folder, so no other test may write one at the same time.
+[Collection("IdsTempFiles")]
 public sealed class SpecificationDescriptionTests
 {
     private static readonly XNamespace Ids = "http://standards.buildingsmart.org/IDS";
