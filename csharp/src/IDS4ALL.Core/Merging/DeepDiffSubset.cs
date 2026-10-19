@@ -8,7 +8,7 @@ public enum DiffKind { DictionaryItemAdded, DictionaryItemRemoved, IterableItemA
 public sealed record ApplicabilityDiff(bool DictionaryItemAdded, bool DictionaryItemRemoved, bool IterableItemAdded, bool IterableItemRemoved, bool ValuesChanged);
 
 /// <summary>
-/// The part of the Python library DeepDiff (version 8.3.0) that custom_functions.py uses: text, list and dictionary values,
+/// The part of the Python library DeepDiff (version 8.6.2) that custom_functions.py uses: text, list and dictionary values,
 /// no type changes. The comparison with ignore_order=True pairs changed items like DeepDiff does (rough distance below 0.3).
 /// </summary>
 public static class DeepDiffSubset
