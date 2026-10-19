@@ -64,7 +64,8 @@ public sealed class IdsWriter
     {
         var built = Call(ids, "Specification",
             ("name", spec.Name), ("ifcVersion", spec.IfcVersions), ("minOccurs", spec.MinOccurs),
-            ("maxOccurs", spec.MaxOccurs is { } max ? max : "unbounded"), ("instructions", spec.Instructions));
+            ("maxOccurs", spec.MaxOccurs is { } max ? max : "unbounded"), ("instructions", spec.Instructions),
+            ("description", spec.Description));
         AppendFacets(ids, built.GetAttr("applicability"), spec.Applicability);
         AppendFacets(ids, built.GetAttr("requirements"), spec.Requirements);
         return built;
