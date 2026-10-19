@@ -16,16 +16,32 @@ public sealed class XlsxWorkbook : IDisposable
 
     public IReadOnlyList<string> SheetNames => _workbook.Worksheets.Select(sheet => sheet.Name).ToList();
 
+    /// <exception cref="XlsxException">The file is not a valid .xlsx workbook.</exception>
     public static XlsxWorkbook Open(string path)
+    {
+        // ClosedXML locks the file for writing, so read from a copy of the bytes.
+        return Load(new MemoryStream(File.ReadAllBytes(path)), $"The file '{path}'");
+    }
+
+    /// <summary>Reads the workbook from a stream, from its current position to its end. The stream stays open and is not changed otherwise.</summary>
+    /// <exception cref="XlsxException">The stream does not hold a valid .xlsx workbook.</exception>
+    public static XlsxWorkbook Open(Stream stream)
+    {
+        var copy = new MemoryStream();
+        stream.CopyTo(copy);
+        copy.Position = 0;
+        return Load(copy, "The stream");
+    }
+
+    private static XlsxWorkbook Load(MemoryStream content, string source)
     {
         try
         {
-            // ClosedXML locks the file for writing, so read from a copy of the bytes.
-            return new XlsxWorkbook(new XLWorkbook(new MemoryStream(File.ReadAllBytes(path))));
+            return new XlsxWorkbook(new XLWorkbook(content));
         }
         catch (Exception ex) when (ex is not IOException)
         {
-            throw new XlsxException($"The file '{path}' is not a valid .xlsx workbook: {ex.Message}", ex);
+            throw new XlsxException($"{source} is not a valid .xlsx workbook: {ex.Message}", ex);
         }
     }
 
