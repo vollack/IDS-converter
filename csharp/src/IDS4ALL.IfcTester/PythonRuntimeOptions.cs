@@ -2,7 +2,13 @@ namespace IDS4ALL.IfcTester;
 
 /// <param name="PythonDll">Path of the Python library, for example python314.dll.</param>
 /// <param name="SitePackages">Folder with ifctester and its packages. Null if Python finds them itself.</param>
-public sealed record PythonRuntimeOptions(string PythonDll, string? SitePackages = null)
+/// <param name="ExtraModules">Modules that must load besides the ones of the converter. An application that embeds the converter names its own packages here.</param>
+/// <param name="ExtraPaths">Folders that Python adds to sys.path besides <paramref name="SitePackages"/>.</param>
+public sealed record PythonRuntimeOptions(
+    string PythonDll,
+    string? SitePackages = null,
+    IReadOnlyList<string>? ExtraModules = null,
+    IReadOnlyList<string>? ExtraPaths = null)
 {
     public const string PythonDllVariable = "IDS4ALL_PYTHON_DLL";
     public const string SitePackagesVariable = "IDS4ALL_PYTHON_SITE_PACKAGES";

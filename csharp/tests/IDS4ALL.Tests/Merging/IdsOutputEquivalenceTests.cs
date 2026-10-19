@@ -1,4 +1,5 @@
 using System.Text.Json;
+using IDS4ALL.Core;
 using IDS4ALL.Core.Excel;
 using IDS4ALL.Core.Ids;
 using IDS4ALL.Core.Import;
@@ -70,7 +71,7 @@ public sealed class IdsOutputEquivalenceTests
         using (var opened = XlsxWorkbook.Open(path)) settings = MetadataReader.Read(opened);
 
         using var directory = new TempDirectory();
-        AssertSameFiles(path, settings, directory.Path);
+        AssertSameFiles(path, settings, directory.Path, useConverter: true);
     }
 
     public static TheoryData<string> ExampleWorkbooks() => MetadataReaderTests.ExampleWorkbooks();
@@ -100,7 +101,7 @@ public sealed class IdsOutputEquivalenceTests
     }
 
     /// <returns>The number of files that both versions wrote.</returns>
-    private static int AssertSameFiles(string path, Ids4AllSettings settings, string directory)
+    private static int AssertSameFiles(string path, Ids4AllSettings settings, string directory, bool useConverter = false)
     {
         using var document = Script.Call("files", RepositoryRoot.Path, path, settings.SheetName, settings.SkippedRows, settings.IfcVersion,
             settings.IsEntityBasedApplicability, JsonSerializer.Serialize(settings.SeparateBy), directory,
@@ -111,7 +112,7 @@ public sealed class IdsOutputEquivalenceTests
         string? importError = null;
         try
         {
-            actual = WriteWithCSharp(path, settings, directory);
+            actual = WriteWithCSharp(path, settings, directory, useConverter);
         }
         catch (Exception ex) when (ex is ImportException or XlsxException)
         {
@@ -159,11 +160,25 @@ public sealed class IdsOutputEquivalenceTests
         return $"Python has {a.Length} lines, C# has {b.Length}.";
     }
 
-    private static List<(string Key, string? Xml, string? Error)> WriteWithCSharp(string path, Ids4AllSettings settings, string directory)
+    /// <param name="useConverter">Runs the steps through Ids4AllConverter. The random sheets have no sheet "IDS4ALL", so they run the steps one by one with given settings.</param>
+    private static List<(string Key, string? Xml, string? Error)> WriteWithCSharp(string path, Ids4AllSettings settings, string directory, bool useConverter)
     {
         using var workbook = XlsxWorkbook.Open(path);
-        var list = SpecificationBuilder.Build(SheetImporter.Import(workbook, settings), settings);
         var writer = new IdsWriter(PythonRuntimeOptions.FromEnvironment());
+        if (useConverter)
+        {
+            var files = new List<(string, string?, string?)>();
+            var conversion = Ids4AllConverter.Convert(workbook, new DateOnly(2026, 1, 1));
+            for (var n = 0; n < conversion.Files.Count; n++)
+            {
+                var target = Path.Combine(directory, $"converter{n}.ids");
+                writer.Write(conversion.Files[n].File, target);
+                files.Add((conversion.Files[n].Key, File.ReadAllText(target), null));
+            }
+            return files;
+        }
+
+        var list = SpecificationBuilder.Build(SheetImporter.Import(workbook, settings), settings);
 
         var result = new List<(string, string?, string?)>();
         var number = 0;

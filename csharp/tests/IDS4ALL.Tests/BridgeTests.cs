@@ -3,6 +3,8 @@ using IDS4ALL.IfcTester;
 
 namespace IDS4ALL.Tests;
 
+// One collection: BridgeTests counts the temporary .ids files in the temp folder, so no other test may write one at the same time.
+[Collection("IdsTempFiles")]
 public sealed class BridgeTests
 {
     private const string Comment = " Created with the IDS4ALL Converter test. ";
@@ -94,6 +96,33 @@ public sealed class BridgeTests
         {
             File.Delete(path);
         }
+    }
+
+    [PythonFact]
+    public void WriteToString_ReturnsTheTextOfTheFileAndLeavesNoTempFile()
+    {
+        var before = Directory.GetFiles(Path.GetTempPath(), "ids4all-*.ids").Length;
+
+        var output = CreateWriter().WriteToString(BuildFile(), Comment);
+
+        Assert.True(output.IsValid);
+        var expected = File.ReadAllBytes(Path.Combine(AppContext.BaseDirectory, "Golden", "bridge-basic.ids"));
+        Assert.Equal(expected, System.Text.Encoding.UTF8.GetBytes(output.Xml));
+        Assert.Equal(before, Directory.GetFiles(Path.GetTempPath(), "ids4all-*.ids").Length);
+    }
+
+    [PythonFact]
+    public void WriteToString_WithInvalidIfcVersion_ThrowsAndLeavesNoTempFile()
+    {
+        var before = Directory.GetFiles(Path.GetTempPath(), "ids4all-*.ids").Length;
+        var file = BuildFile() with
+        {
+            Specifications = [BuildFile().Specifications[1] with { IfcVersions = ["IFC9"] }],
+        };
+
+        Assert.Throws<IdsWriteException>(() => CreateWriter().WriteToString(file));
+
+        Assert.Equal(before, Directory.GetFiles(Path.GetTempPath(), "ids4all-*.ids").Length);
     }
 
     [PythonFact]

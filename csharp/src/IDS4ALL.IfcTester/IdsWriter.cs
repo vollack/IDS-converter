@@ -1,3 +1,4 @@
+using System.Text;
 using IDS4ALL.Core.Model;
 using Python.Runtime;
 
@@ -45,6 +46,25 @@ public sealed class IdsWriter
         }
     }
 
+    /// <summary>
+    /// Writes the IDS file to text, UTF-8 with the XML declaration. ifctester can only write to a path, so this writes
+    /// a temporary file and reads it back. The file is deleted.
+    /// </summary>
+    /// <exception cref="IdsWriteException">ifctester raised an exception.</exception>
+    public IdsOutput WriteToString(IdsFile file, string? creatorComment = null)
+    {
+        var path = Path.Combine(Path.GetTempPath(), $"ids4all-{Guid.NewGuid():N}.ids");
+        try
+        {
+            var isValid = Write(file, path, creatorComment);
+            return new IdsOutput(File.ReadAllText(path, Encoding.UTF8), isValid);
+        }
+        finally
+        {
+            File.Delete(path);
+        }
+    }
+
     private static PyObject Build(PyObject ids, IdsFile file)
     {
         var document = Call(ids, "Ids",
@@ -64,7 +84,8 @@ public sealed class IdsWriter
     {
         var built = Call(ids, "Specification",
             ("name", spec.Name), ("ifcVersion", spec.IfcVersions), ("minOccurs", spec.MinOccurs),
-            ("maxOccurs", spec.MaxOccurs is { } max ? max : "unbounded"), ("instructions", spec.Instructions));
+            ("maxOccurs", spec.MaxOccurs is { } max ? max : "unbounded"), ("instructions", spec.Instructions),
+            ("description", spec.Description));
         AppendFacets(ids, built.GetAttr("applicability"), spec.Applicability);
         AppendFacets(ids, built.GetAttr("requirements"), spec.Requirements);
         return built;
