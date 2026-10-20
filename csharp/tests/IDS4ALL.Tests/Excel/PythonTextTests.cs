@@ -71,8 +71,7 @@ public sealed class PythonTextTests
             Assert.Equal(Field("strip"), PythonText.Strip(sample));
             Assert.Equal(Field("repr"), PythonText.Repr(sample));
             Assert.Equal(Field("list"), PythonText.Repr(new[] { sample, sample }));
-            // Python maps a few characters to two characters. IFC names are ASCII, so only simple mappings are compared.
-            if (sample.All(c => c < 0x80 || !"İǆı".Contains(c))) Assert.Equal(Field("upper"), PythonText.Upper(sample));
+            Assert.Equal(Field("upper"), PythonText.Upper(sample));
         }
     }
 }

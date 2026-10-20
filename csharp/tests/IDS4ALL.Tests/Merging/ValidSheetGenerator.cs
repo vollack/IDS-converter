@@ -36,6 +36,14 @@ internal static class ValidSheetGenerator
     /// <summary>Writes the sheet "Data" and returns the columns and the columns that separate the files.</summary>
     public static (List<string> Columns, string[] SeparateBy) Write(Random random, string path)
     {
+        var (rows, columns, separateBy) = Generate(random);
+        new XlsxBuilder().Sheet("Data", rows).Save(path);
+        return (columns, separateBy);
+    }
+
+    /// <summary>Generates the rows of the sheet "Data", with the header row, and the columns that separate the files.</summary>
+    public static (TestCell?[][] Rows, List<string> Columns, string[] SeparateBy) Generate(Random random)
+    {
         // The entity group is always there, so that every specification has an applicability.
         var applicability = new List<Group> { ApplicabilityGroups[0] };
         applicability.AddRange(ApplicabilityGroups.Skip(1).Where(_ => random.Next(4) == 0));
@@ -66,9 +74,8 @@ internal static class ValidSheetGenerator
             rows.Add(columns.Select(column => cells[column]).ToArray());
         }
 
-        new XlsxBuilder().Sheet("Data", [.. rows]).Save(path);
         var separateBy = new[] { "Phase", "Role", "Usecase" }.Where(column => columns.Contains(column) && random.Next(2) == 0).ToArray();
-        return (columns, separateBy);
+        return ([.. rows], columns, separateBy);
     }
 
     private static Dictionary<string, TestCell?> Template(Random random, Group group)

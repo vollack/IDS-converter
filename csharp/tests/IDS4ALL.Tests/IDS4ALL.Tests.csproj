@@ -23,6 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\src\IDS4ALL.Cli\IDS4ALL.Cli.csproj" />
     <ProjectReference Include="..\..\src\IDS4ALL.Core\IDS4ALL.Core.csproj" />
     <ProjectReference Include="..\..\src\IDS4ALL.IfcTester\IDS4ALL.IfcTester.csproj" />
   </ItemGroup>
