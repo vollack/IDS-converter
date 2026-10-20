@@ -77,11 +77,13 @@ public sealed partial class ConverterTests
         Assert.Contains("IDS4ALL", error);
     }
 
-    internal static (int Code, string Output, string Error) Run(params string[] arguments)
+    internal static (int Code, string Output, string Error) Run(params string[] arguments) => Run(Today, arguments);
+
+    internal static (int Code, string Output, string Error) Run(DateOnly today, params string[] arguments)
     {
         using var output = new StringWriter();
         using var error = new StringWriter();
-        var code = Converter.Run(arguments, output, error, () => new IdsWriter(PythonRuntimeOptions.FromEnvironment()), Today);
+        var code = Converter.Run(arguments, output, error, () => new IdsWriter(PythonRuntimeOptions.FromEnvironment()), today);
         return (code, output.ToString(), error.ToString());
     }
 

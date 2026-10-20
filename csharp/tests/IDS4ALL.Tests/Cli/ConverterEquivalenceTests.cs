@@ -93,7 +93,8 @@ public sealed partial class ConverterEquivalenceTests
         var pythonError = document.RootElement.GetProperty("error").GetString();
         var pythonMessages = Normalize(document.RootElement.GetProperty("stdout").GetString()!, pythonOutput);
 
-        var (code, messages, error) = ConverterTests.Run("--excel_path", excelPath, "--excel_name", excelName, "--output_path", csharpOutput);
+        // IDS4ALL-main.py writes date.today(), the local date.
+        var (code, messages, error) = ConverterTests.Run(DateOnly.FromDateTime(DateTime.Today), "--excel_path", excelPath, "--excel_name", excelName, "--output_path", csharpOutput);
 
         if (pythonError is null)
             Assert.True(code == 0, $"C# failed ({error}) but Python did not.");
