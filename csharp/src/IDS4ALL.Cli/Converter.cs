@@ -1,12 +1,11 @@
+using IDS4ALL.Core;
 using IDS4ALL.Core.Excel;
-using IDS4ALL.Core.Ids;
 using IDS4ALL.Core.Import;
-using IDS4ALL.Core.Merging;
 using IDS4ALL.IfcTester;
 
 namespace IDS4ALL.Cli;
 
-/// <summary>Port of main, process_excel_data and create_ids_files in IDS4ALL-main.py.</summary>
+/// <summary>Port of main and the output of create_ids_files in IDS4ALL-main.py. The conversion itself is <see cref="Ids4AllConverter"/>.</summary>
 public static class Converter
 {
     public const string CreatorComment =
@@ -54,21 +53,16 @@ public static class Converter
         output.WriteLine($"Output path: {options.OutputPath}");
         output.WriteLine();
 
-        Ids4AllSettings settings;
-        SpecificationList list;
+        Ids4AllConversion conversion;
         using (var workbook = XlsxWorkbook.Open(excelFile))
-        {
-            settings = MetadataReader.Read(workbook);
-            list = SpecificationBuilder.Build(SheetImporter.Import(workbook, settings), settings);
-        }
+            conversion = Ids4AllConverter.Convert(workbook, today);
 
-        foreach (var (key, group) in SpecificationFactory.Separate(list.Specifications))
+        foreach (var (key, file) in conversion.Files)
         {
-            var file = IdsFileBuilder.Build(group, settings, today, list.Descriptions);
             try
             {
                 Directory.CreateDirectory(options.OutputPath);
-                var target = Path.Combine(options.OutputPath, options.ExcelName + "_" + settings.SheetName + key.Replace('/', '-') + ".ids");
+                var target = Path.Combine(options.OutputPath, options.ExcelName + "_" + conversion.Settings.SheetName + key.Replace('/', '-') + ".ids");
                 writer.Write(file, target, CreatorComment);
                 output.WriteLine("XML created");
                 output.WriteLine($"Output file: {target}");
