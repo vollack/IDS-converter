@@ -21,17 +21,75 @@ public static class PythonText
         return text[start..end];
     }
 
-    /// <summary>
-    /// Python str.upper() for text without special case mappings. Python also maps for example "ß" to "SS" and "ı" to "I".
-    /// IFC names contain only ASCII letters, where both functions agree.
-    /// </summary>
-    public static string Upper(string text) => text.ToUpperInvariant();
+    /// <summary>Python str.upper(). It uses the full case mapping, so "ß" gives "SS".</summary>
+    public static string Upper(string text)
+    {
+        var builder = new StringBuilder(text.Length);
+        for (var i = 0; i < text.Length; i += CodePointLength(text, i))
+        {
+            var piece = text.Substring(i, CodePointLength(text, i));
+            builder.Append(PythonCaseData.Upper.TryGetValue(CodePointAt(text, i), out var mapped) ? mapped : piece.ToUpperInvariant());
+        }
+        return builder.ToString();
+    }
 
-    /// <summary>
-    /// Python str.lower() for text without special case mappings. Python maps "İ" to two characters, .NET to one.
-    /// The values that the converter compares (required, prohibited) are ASCII.
-    /// </summary>
-    public static string Lower(string text) => text.ToLowerInvariant();
+    /// <summary>Python str.lower(). It uses the full case mapping, so "İ" gives two characters, and the final sigma rule.</summary>
+    public static string Lower(string text)
+    {
+        var builder = new StringBuilder(text.Length);
+        for (var i = 0; i < text.Length; i += CodePointLength(text, i))
+        {
+            var codePoint = CodePointAt(text, i);
+            if (codePoint == 0x3A3) builder.Append(IsFinalSigma(text, i) ? 'ς' : 'σ');
+            else if (PythonCaseData.Lower.TryGetValue(codePoint, out var mapped)) builder.Append(mapped);
+            else builder.Append(text.Substring(i, CodePointLength(text, i)).ToLowerInvariant());
+        }
+        return builder.ToString();
+    }
+
+    /// <summary>A capital sigma is final if a cased letter is before it and no cased letter is after it. Case-ignorable characters do not count.</summary>
+    private static bool IsFinalSigma(string text, int index)
+    {
+        var before = index;
+        while (before > 0)
+        {
+            before -= before >= 2 && char.IsLowSurrogate(text[before - 1]) && char.IsHighSurrogate(text[before - 2]) ? 2 : 1;
+            var codePoint = CodePointAt(text, before);
+            if (!Contains(PythonCaseData.CaseIgnorable, codePoint))
+                return Contains(PythonCaseData.Cased, codePoint) && !IsCasedAfter(text, index + 1);
+        }
+        return false;
+    }
+
+    private static bool IsCasedAfter(string text, int start)
+    {
+        for (var i = start; i < text.Length; i += CodePointLength(text, i))
+        {
+            var codePoint = CodePointAt(text, i);
+            if (!Contains(PythonCaseData.CaseIgnorable, codePoint)) return Contains(PythonCaseData.Cased, codePoint);
+        }
+        return false;
+    }
+
+    private static int CodePointLength(string text, int index) =>
+        index + 1 < text.Length && char.IsHighSurrogate(text[index]) && char.IsLowSurrogate(text[index + 1]) ? 2 : 1;
+
+    private static int CodePointAt(string text, int index) =>
+        CodePointLength(text, index) == 2 ? char.ConvertToUtf32(text[index], text[index + 1]) : text[index];
+
+    /// <param name="ranges">Pairs of first and last code point, in ascending order.</param>
+    private static bool Contains(int[] ranges, int codePoint)
+    {
+        int low = 0, high = ranges.Length / 2 - 1;
+        while (low <= high)
+        {
+            var middle = (low + high) / 2;
+            if (codePoint < ranges[2 * middle]) high = middle - 1;
+            else if (codePoint > ranges[2 * middle + 1]) low = middle + 1;
+            else return true;
+        }
+        return false;
+    }
 
     /// <summary>Python repr() of a str.</summary>
     public static string Repr(string text)

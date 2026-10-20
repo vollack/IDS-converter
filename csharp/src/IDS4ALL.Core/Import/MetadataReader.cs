@@ -26,7 +26,7 @@ public static class MetadataReader
             ? Text(entries, "File separators").Replace(" ", "").Split(',')
             : [];
         var isEntityBased = entries.ContainsKey("Entity-based applicability")
-            && Text(entries, "Entity-based applicability").ToLowerInvariant() == "yes";
+            && PythonText.Lower(Text(entries, "Entity-based applicability")) == "yes";
 
         return new Ids4AllSettings(
             SheetName: Text(entries, "Sheet name"),
